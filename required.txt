@@ -1,0 +1,10 @@
+Initialize a new Node.js project:
+	npm init -y
+Install the necessary packages:
+	npm install express mongoose dotenv cors jsonwebtoken bcrypt
+	npm install --save-dev nodemon
+Run backend server:
+	nodemon index.js
+Run client server:
+	ng serve
+

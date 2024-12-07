@@ -1,0 +1,8 @@
+# Ignore environment variables
+.env
+
+# Ignore node_modules folders in both client and backend
+/node_modules
+
+#
+required
