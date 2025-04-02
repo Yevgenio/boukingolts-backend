@@ -2,16 +2,23 @@ const mongoose = require('mongoose');
 
 const dealSchema = new mongoose.Schema({
   name: { type: String, required: true },
-  description: String,
-  price: Number, // { type: Number, required: true },
-  category: String,
+  description: { type: String, default: "" },
+  category: { type: String, default: "כללי" },
   imagePath: {type: String, default: "default"},
   barcodePath: {type: String, default: "default"},
-  stock: Number, //{ type: Number, required: true },
+  stock: { type: Number, default: -1 },
   startsAt: { type: Date, default: Date.now }, 
-  endsAt: Date, 
+  endsAt: { type: Date, default: null }, 
   createdAt: { type: Date, default: Date.now }, 
+  createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: false }, // User field
 });
+
+// // Add a text index to enable full-text search
+// dealSchema.index({ 
+//   name: 'text', 
+//   description: 'text', 
+//   category: 'text' 
+// });
 
 module.exports = mongoose.model('Deal', dealSchema);
 

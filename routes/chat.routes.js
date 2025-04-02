@@ -1,31 +1,50 @@
 const express = require('express');
 const router = express.Router();
-const mongoose = require('mongoose');
-
-const Chat = require('../models/chat.model');
 
 const { verifyToken, verifyAdmin } = require('../middleware/auth.middleware');
 const chatController = require('../controllers/chat.controller');
 const upload = require('../middleware/file.middleware'); 
 
-// GET all chats
-router.get('/', chatController.getAllChats);
+// GET all deals
+router.get('/', chatController.getAllChats);         
 
-// POST create a new chat
-// router.post('/', verifyToken, verifyAdmin, chatController.addNewChat);
-// POST create a new deal
+// Route to get a specific chat by ID
+router.get('/id/:id', chatController.getChatById);
+
+router.get('/search', chatController.searchChats);    // GET deal by query
+
+// POST new deal
 router.post(
     '/',
     verifyToken, 
     verifyAdmin, 
-    upload.fields([{ name: 'imagePath', maxCount: 1 }]),
+    upload.fields([
+        { 
+            name: 'imagePath', 
+            maxCount: 1 
+        }
+    ]),
     chatController.addNewChat
 );
-// router.post('/', verifyToken, verifyAdmin, upload.single('image'), dealController.addNewDeal);
 
+// PUT update deal by ID
+router.put('/id/:id', 
+    verifyToken, 
+    verifyAdmin, 
+    upload.fields([
+        { 
+            name: 'imagePath', 
+            maxCount: 1 
+        }
+    ]),
+    chatController.updateChatById);  
 
-// Route to get a specific chat by ID
-router.get('/id/:id', chatController.getChatById);
+// DELETE deal by ID
+router.delete('/id/:id',
+    verifyToken, 
+    verifyAdmin, 
+    chatController.deleteChatById
+); 
 
 // Route definitions with category parameters
 // router.post('/new', chatController.catalog("new"));

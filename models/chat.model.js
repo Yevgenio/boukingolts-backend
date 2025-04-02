@@ -5,8 +5,16 @@ const chatSchema = new mongoose.Schema({
   description: String,
   link: String,
   category: String,
-  imagePath: {type: String, default: "default"},
+  imagePath: { type: String, default: "default"},
   createdAt: { type: Date, default: Date.now },
+  createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: false },  // User field
+});
+
+// Add a text index to enable full-text search
+chatSchema.index({ 
+  name: 'text', 
+  description: 'text', 
+  category: 'text' 
 });
 
 module.exports = mongoose.model('Chat', chatSchema);
