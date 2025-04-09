@@ -3,21 +3,21 @@ const router = express.Router();
 const mongoose = require('mongoose');
 
 const { verifyToken, verifyAdmin } = require('../middleware/auth.middleware');
-const dealController = require('../controllers/product.controller');
+const productController = require('../controllers/product.controller');
 const upload = require('../middleware/file.middleware'); 
  
 
-// GET all deals
-router.get('/', dealController.getAllDeals);
+// GET all products
+router.get('/', productController.getAllProducts);
 
 // GET product by ID
-router.get('/id/:id', dealController.getDealById); 
+router.get('/id/:id', productController.getProductById); 
  
-// GET deals by query
-router.get('/search', dealController.searchDeals);
+// GET products by query
+router.get('/search', productController.searchProducts);
 
 // GET distinct categories
-router.get('/categories', dealController.getDistinctCategories);
+router.get('/categories', productController.getDistinctCategories);
 
 // POST new product
 router.post(
@@ -32,7 +32,7 @@ router.post(
             name: 'barcodePath', 
             maxCount: 1 }
     ]),
-    dealController.addNewDeal
+    productController.addNewProduct
 );
 
 // PUT update product by ID
@@ -44,7 +44,7 @@ router.put(
       { name: 'imagePath', maxCount: 1 },
       { name: 'barcodePath', maxCount: 1 },
     ]),
-    dealController.updateDealById
+    productController.updateProductById
   );
 
 // DELETE product by ID
@@ -52,7 +52,7 @@ router.delete(
     '/id/:id',
     verifyToken,
     verifyAdmin,
-    dealController.deleteDealById
+    productController.deleteProductById
   );
   
 module.exports = router;

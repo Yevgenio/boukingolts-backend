@@ -22,22 +22,22 @@ exports.globalSearch = async (req, res) => {
   const skip = (currentPage - 1) * itemsPerPage;
 
   try {
-    const [deals, chats, dealsCount, chatsCount] = await Promise.all([
-      // Fetch deals with pagination
+    const [products, chats, productsCount, chatsCount] = await Promise.all([
+      // Fetch products with pagination
       Product.find(searchQuery).skip(skip).limit(itemsPerPage),
       // Fetch chats with pagination
       Chat.find(searchQuery).skip(skip).limit(itemsPerPage),
-      // Total count for deals
+      // Total count for products
       Product.countDocuments(searchQuery),
       // Total count for chats
       Chat.countDocuments(searchQuery),
     ]);
 
     // Total results across collections
-    const totalResults = dealsCount + chatsCount;
+    const totalResults = productsCount + chatsCount;
 
     res.json({
-      deals,
+      products,
       chats,
       pagination: {
         totalResults,

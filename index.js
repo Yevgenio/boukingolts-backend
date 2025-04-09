@@ -57,8 +57,8 @@ const chatRoutes = require('./routes/chat.routes');
 app.use('/api/chats', chatRoutes);
 
 // Product Routes
-const dealRoutes = require('./routes/product.routes');
-app.use('/api/deals', dealRoutes);
+const productRoutes = require('./routes/product.routes');
+app.use('/api/products', productRoutes);
 
 // Memo Routes
 const memoRoutes = require('./routes/memo.routes');

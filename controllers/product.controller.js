@@ -9,17 +9,17 @@ exports.getDistinctCategories = async (req, res) => {
   }
 };
 
-exports.getAllDeals = async (req, res) => {
+exports.getAllProducts = async (req, res) => {
   try {
-    const deals = await Product.find();
-    res.json(deals);
+    const products = await Product.find();
+    res.json(products);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 }
 
 // Get a product by ID
-exports.getDealById = async (req, res) => {
+exports.getProductById = async (req, res) => {
   try {
     const product = await Product.findById(req.params.id);
     if (!product) return res.status(404).json({ message: 'Product not found' });
@@ -29,8 +29,8 @@ exports.getDealById = async (req, res) => {
   }
 };
 
-// Get all deals with optional search, filter, and sort
-exports.searchDeals = async (req, res) => {
+// Get all products with optional search, filter, and sort
+exports.searchProducts = async (req, res) => {
   try {
     const { query, category, sort, limit, page } = req.query;
 
@@ -62,8 +62,8 @@ exports.searchDeals = async (req, res) => {
     const currentPage = parseInt(page) || 1;
     const skip = (currentPage - 1) * itemsPerPage;
 
-    // Fetch deals from the database
-    const deals = await Product.find(searchQuery)
+    // Fetch products from the database
+    const products = await Product.find(searchQuery)
       .sort(sortOptions)
       .skip(skip)
       .limit(itemsPerPage);
@@ -72,7 +72,7 @@ exports.searchDeals = async (req, res) => {
     const totalCount = await Product.countDocuments(searchQuery);
 
     res.json({
-      data: deals,
+      data: products,
       pagination: {
         total: totalCount,
         page: currentPage,
@@ -84,7 +84,7 @@ exports.searchDeals = async (req, res) => {
   }
 }
 
-exports.addNewDeal = async (req, res) => {
+exports.addNewProduct = async (req, res) => {
   try {
     // Save the image path if a file was uploaded
     const imagePath = req.files?.imagePath ? req.files.imagePath[0].filename.split('/').pop() : 'default.jpg';
@@ -102,28 +102,28 @@ exports.addNewDeal = async (req, res) => {
       createdBy: req.user._id, // Attach user ID from token
     });    
 
-    const newDeal = await product.save();
-    res.status(201).json(newDeal);
+    const newProduct = await product.save();
+    res.status(201).json(newProduct);
   } catch (err) {
     res.status(400).json({ message: err.message });
   }
 };
 
-exports.updateDealById = async (req, res) => {
+exports.updateProductById = async (req, res) => {
   try {
     // Find the existing product first
-    const existingDeal = await Product.findById(req.params.id);
-    if (!existingDeal) {
+    const existingProduct = await Product.findById(req.params.id);
+    if (!existingProduct) {
       return res.status(404).json({ message: 'Product not found' });
     }
 
     // Handle uploaded files
-    const imagePath = req.files?.imagePath ? req.files.imagePath[0].filename.split('/').pop() : existingDeal.imagePath.split('/').pop();
-    const barcodePath = req.files?.barcodePath ? req.files.barcodePath[0].filename.split('/').pop() : existingDeal.barcodePath.split('/').pop();
+    const imagePath = req.files?.imagePath ? req.files.imagePath[0].filename.split('/').pop() : existingProduct.imagePath.split('/').pop();
+    const barcodePath = req.files?.barcodePath ? req.files.barcodePath[0].filename.split('/').pop() : existingProduct.barcodePath.split('/').pop();
 
     // Prepare the update data
     const updateData = {
-      ...existingDeal.toObject(), // Start with the existing data
+      ...existingProduct.toObject(), // Start with the existing data
       ...req.body, // Overwrite with new data from the request
       imagePath, // Use new or existing image path
       barcodePath, // Use new or existing barcode path
@@ -132,19 +132,19 @@ exports.updateDealById = async (req, res) => {
     // Ensure we don't accidentally update `_id` or other immutable fields
     delete updateData._id;
 
-    const updatedDeal = await Product.findByIdAndUpdate(req.params.id, updateData, { new: true, runValidators: true });
+    const updatedProduct = await Product.findByIdAndUpdate(req.params.id, updateData, { new: true, runValidators: true });
 
-    res.json(updatedDeal);
+    res.json(updatedProduct);
   } catch (err) {
     res.status(400).json({ message: err.message });
   }
 };
 
 // Delete a product by ID
-exports.deleteDealById = async (req, res) => {
+exports.deleteProductById = async (req, res) => {
   try {
-    const deletedDeal = await Product.findByIdAndDelete(req.params.id);
-    if (!deletedDeal) return res.status(404).json({ message: 'Product not found' });
+    const deletedProduct = await Product.findByIdAndDelete(req.params.id);
+    if (!deletedProduct) return res.status(404).json({ message: 'Product not found' });
     res.json({ message: 'Product deleted successfully' });
   } catch (err) {
     res.status(500).json({ message: err.message });

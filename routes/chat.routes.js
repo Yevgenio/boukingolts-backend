@@ -5,7 +5,7 @@ const { verifyToken, verifyAdmin } = require('../middleware/auth.middleware');
 const chatController = require('../controllers/chat.controller');
 const upload = require('../middleware/file.middleware'); 
 
-// GET all deals
+// GET all products
 router.get('/', chatController.getAllChats);         
 
 // Route to get a specific chat by ID

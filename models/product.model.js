@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const dealSchema = new mongoose.Schema({
+const productSchema = new mongoose.Schema({
   name: { type: String, required: true },
   description: { type: String, default: "" },
   category: { type: String, default: "כללי" },
@@ -14,13 +14,13 @@ const dealSchema = new mongoose.Schema({
 });
 
 // // Add a text index to enable full-text search
-// dealSchema.index({ 
+// productSchema.index({ 
 //   name: 'text', 
 //   description: 'text', 
 //   category: 'text' 
 // });
 
-module.exports = mongoose.model('Product', dealSchema);
+module.exports = mongoose.model('Product', productSchema);
 
 // [
 //   {
