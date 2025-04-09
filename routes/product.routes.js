@@ -25,12 +25,9 @@ router.post(
     verifyToken, 
     verifyAdmin, 
     upload.fields([
-        { 
-            name: 'imagePath', 
-            maxCount: 1 }, 
-        { 
-            name: 'barcodePath', 
-            maxCount: 1 }
+      { name: 'images', maxCount: 10 }, // Allow up to 10 images
+      { name: 'imagePath',  maxCount: 1 }, 
+      { name: 'barcodePath', maxCount: 1 }
     ]),
     productController.addNewProduct
 );
@@ -41,6 +38,7 @@ router.put(
     verifyToken,
     verifyAdmin,
     upload.fields([
+      { name: 'images', maxCount: 10 }, // Allow up to 10 images
       { name: 'imagePath', maxCount: 1 },
       { name: 'barcodePath', maxCount: 1 },
     ]),

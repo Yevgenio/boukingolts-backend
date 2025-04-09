@@ -90,6 +90,11 @@ exports.addNewProduct = async (req, res) => {
     const imagePath = req.files?.imagePath ? req.files.imagePath[0].filename.split('/').pop() : 'default.jpg';
     const barcodePath = req.files?.barcodePath ? req.files.barcodePath[0].filename.split('/').pop() : 'default.jpg';
 
+    const images = req.files?.images?.map((file, index) => ({
+      url: file.filename.split('/').pop(),
+      order: index
+    })) || [];
+    
     const product = new Product({
       name: req.body.name,
       description: req.body.description,
@@ -121,10 +126,19 @@ exports.updateProductById = async (req, res) => {
     const imagePath = req.files?.imagePath ? req.files.imagePath[0].filename.split('/').pop() : existingProduct.imagePath.split('/').pop();
     const barcodePath = req.files?.barcodePath ? req.files.barcodePath[0].filename.split('/').pop() : existingProduct.barcodePath.split('/').pop();
 
+    // Handle image updates
+    const newImages = req.files?.images?.map((file, index) => ({
+      url: file.filename.split('/').pop(),
+      order: existingProduct.images.length + index
+    })) || [];
+
+    const updatedImages = [...existingProduct.images, ...newImages];
+    
     // Prepare the update data
     const updateData = {
       ...existingProduct.toObject(), // Start with the existing data
       ...req.body, // Overwrite with new data from the request
+      images: updatedImages, // Use new images array
       imagePath, // Use new or existing image path
       barcodePath, // Use new or existing barcode path
     };
