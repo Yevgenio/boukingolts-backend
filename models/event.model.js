@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const chatSchema = new mongoose.Schema({
+const eventSchema = new mongoose.Schema({
   name: { type: String, required: true },
   description: String,
   link: String,
@@ -11,13 +11,13 @@ const chatSchema = new mongoose.Schema({
 });
 
 // Add a text index to enable full-text search
-chatSchema.index({ 
+eventSchema.index({ 
   name: 'text', 
   description: 'text', 
   category: 'text' 
 });
 
-module.exports = mongoose.model('Chat', chatSchema);
+module.exports = mongoose.model('Event', eventSchema);
 
 // {
 //   "name": "Rose Bouquet",

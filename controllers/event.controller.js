@@ -1,27 +1,27 @@
-const Chat = require('../models/chat.model'); // Assuming you have a Chat model defined
+const Event = require('../models/event.model'); // Assuming you have a Event model defined
 
-exports.getAllChats = async (req, res) => {
+exports.getAllEvents = async (req, res) => {
   try {
-    const chats = await Chat.find();
-    res.json(chats);
+    const events = await Event.find();
+    res.json(events);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 }
 
-exports.getChatById = async (req, res) => {
+exports.getEventById = async (req, res) => {
   try {
-    const chat = await Chat.findById(req.params.id);
-    if (!chat) {
-      return res.status(404).send('Chat not found');
+    const event = await Event.findById(req.params.id);
+    if (!event) {
+      return res.status(404).send('Event not found');
     }
-    res.json(chat);
+    res.json(event);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 };
 
-exports.searchChats =  async (req, res) => {
+exports.searchEvents =  async (req, res) => {
   try {
     const { search, sort, limit, page } = req.query;
 
@@ -45,17 +45,17 @@ exports.searchChats =  async (req, res) => {
     const currentPage = parseInt(page) || 1;
     const skip = (currentPage - 1) * itemsPerPage;
 
-    // Fetch chats from the database
-    const chats = await Chat.find(query)
+    // Fetch events from the database
+    const events = await Event.find(query)
       .sort(sortOptions)
       .skip(skip)
       .limit(itemsPerPage);
 
     // Total count for pagination
-    const totalCount = await Chat.countDocuments(query);
+    const totalCount = await Event.countDocuments(query);
 
     res.json({
-      data: chats,
+      data: events,
       pagination: {
         total: totalCount,
         page: currentPage,
@@ -67,10 +67,10 @@ exports.searchChats =  async (req, res) => {
   }
 }
 
-exports.addNewChat = async (req, res) => {
+exports.addNewEvent = async (req, res) => {
   const imagePath = req.files?.imagePath ? req.files.imagePath[0].filename.split('/').pop() : 'default.jpg';
 
-  const chat = new Chat({
+  const event = new Event({
     name: req.body.name,
     description: req.body.description,
     link: req.body.link,
@@ -80,27 +80,27 @@ exports.addNewChat = async (req, res) => {
   });
 
   try {
-    const newChat = await chat.save();
-    res.status(201).json(newChat);
+    const newEvent = await event.save();
+    res.status(201).json(newEvent);
   } catch (err) {
     res.status(400).json({ message: err.message });
   }
 }
 
-exports.updateChatById = async (req, res) => {
+exports.updateEventById = async (req, res) => {
   try {
-    // Find the existing chat first
-    const existingChat = await Chat.findById(req.params.id);
-    if (!existingChat) {
-      return res.status(404).json({ message: 'Chat not found' });
+    // Find the existing event first
+    const existingEvent = await Event.findById(req.params.id);
+    if (!existingEvent) {
+      return res.status(404).json({ message: 'Event not found' });
     }
 
     // Handle uploaded files
-    const imagePath = req.files?.imagePath ? req.files.imagePath[0].filename.split('/').pop() : existingChat.imagePath.split('/').pop();
+    const imagePath = req.files?.imagePath ? req.files.imagePath[0].filename.split('/').pop() : existingEvent.imagePath.split('/').pop();
 
     // Prepare the update data
     const updateData = {
-      ...existingChat.toObject(), // Start with the existing data
+      ...existingEvent.toObject(), // Start with the existing data
       ...req.body, // Overwrite with new data from the request
       imagePath, // Use new or existing image path
     };
@@ -108,20 +108,20 @@ exports.updateChatById = async (req, res) => {
     // Ensure we don't accidentally update `_id` or other immutable fields
     delete updateData._id;
 
-    const updatedChat = await Chat.findByIdAndUpdate(req.params.id, updateData, { new: true, runValidators: true });
+    const updatedEvent = await Event.findByIdAndUpdate(req.params.id, updateData, { new: true, runValidators: true });
 
-    res.json(updatedChat);
+    res.json(updatedEvent);
   } catch (err) {
     res.status(400).json({ message: err.message });
   }
 };
 
-// Delete a chat by ID
-exports.deleteChatById = async (req, res) => {
+// Delete a event by ID
+exports.deleteEventById = async (req, res) => {
   try {
-    const deletedChat = await Chat.findByIdAndDelete(req.params.id);
-    if (!deletedChat) return res.status(404).json({ message: 'Chat not found' });
-    res.json({ message: 'Chat deleted successfully' });
+    const deletedEvent = await Event.findByIdAndDelete(req.params.id);
+    if (!deletedEvent) return res.status(404).json({ message: 'Event not found' });
+    res.json({ message: 'Event deleted successfully' });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }

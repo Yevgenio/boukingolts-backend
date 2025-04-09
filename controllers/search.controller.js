@@ -1,5 +1,5 @@
 const Product = require('../models/product.model');
-const Chat = require('../models/chat.model'); 
+const Event = require('../models/event.model'); 
 const Search = require('../models/search.model'); 
 // const User = require('../models/user.model'); 
 
@@ -22,23 +22,23 @@ exports.globalSearch = async (req, res) => {
   const skip = (currentPage - 1) * itemsPerPage;
 
   try {
-    const [products, chats, productsCount, chatsCount] = await Promise.all([
+    const [products, events, productsCount, eventsCount] = await Promise.all([
       // Fetch products with pagination
       Product.find(searchQuery).skip(skip).limit(itemsPerPage),
-      // Fetch chats with pagination
-      Chat.find(searchQuery).skip(skip).limit(itemsPerPage),
+      // Fetch events with pagination
+      Event.find(searchQuery).skip(skip).limit(itemsPerPage),
       // Total count for products
       Product.countDocuments(searchQuery),
-      // Total count for chats
-      Chat.countDocuments(searchQuery),
+      // Total count for events
+      Event.countDocuments(searchQuery),
     ]);
 
     // Total results across collections
-    const totalResults = productsCount + chatsCount;
+    const totalResults = productsCount + eventsCount;
 
     res.json({
       products,
-      chats,
+      events,
       pagination: {
         totalResults,
         page: currentPage,
@@ -61,7 +61,7 @@ exports.getSearchLogHistory = async (req, res) => {
 
 exports.getSearchLogById = async (req, res) => {
   try {
-    const search = await Chat.findById(req.params.id);
+    const search = await Event.findById(req.params.id);
     if (!search) {
       return res.status(404).send('Search not found');
     }

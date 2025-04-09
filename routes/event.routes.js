@@ -2,16 +2,16 @@ const express = require('express');
 const router = express.Router();
 
 const { verifyToken, verifyAdmin } = require('../middleware/auth.middleware');
-const chatController = require('../controllers/chat.controller');
+const eventController = require('../controllers/event.controller');
 const upload = require('../middleware/file.middleware'); 
 
 // GET all products
-router.get('/', chatController.getAllChats);         
+router.get('/', eventController.getAllEvents);         
 
-// Route to get a specific chat by ID
-router.get('/id/:id', chatController.getChatById);
+// Route to get a specific event by ID
+router.get('/id/:id', eventController.getEventById);
 
-router.get('/search', chatController.searchChats);    // GET product by query
+router.get('/search', eventController.searchEvents);    // GET product by query
 
 // POST new product
 router.post(
@@ -24,7 +24,7 @@ router.post(
             maxCount: 1 
         }
     ]),
-    chatController.addNewChat
+    eventController.addNewEvent
 );
 
 // PUT update product by ID
@@ -37,18 +37,18 @@ router.put('/id/:id',
             maxCount: 1 
         }
     ]),
-    chatController.updateChatById);  
+    eventController.updateEventById);  
 
 // DELETE product by ID
 router.delete('/id/:id',
     verifyToken, 
     verifyAdmin, 
-    chatController.deleteChatById
+    eventController.deleteEventById
 ); 
 
 // Route definitions with category parameters
-// router.post('/new', chatController.catalog("new"));
-// router.post('/popular', chatController.catalog("popular"));
-// router.post('/sale', chatController.catalog("sale"));
+// router.post('/new', eventController.catalog("new"));
+// router.post('/popular', eventController.catalog("popular"));
+// router.post('/sale', eventController.catalog("sale"));
 
 module.exports = router;
