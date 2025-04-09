@@ -1,8 +1,8 @@
-const Deal = require('../models/deal.model'); // Assuming you have a Deal model defined
+const Product = require('../models/product.model'); // Assuming you have a Product model defined
 
 exports.getDistinctCategories = async (req, res) => {
   try {
-    const categories = await Deal.distinct("category");
+    const categories = await Product.distinct("category");
     res.json(categories);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -11,19 +11,19 @@ exports.getDistinctCategories = async (req, res) => {
 
 exports.getAllDeals = async (req, res) => {
   try {
-    const deals = await Deal.find();
+    const deals = await Product.find();
     res.json(deals);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 }
 
-// Get a deal by ID
+// Get a product by ID
 exports.getDealById = async (req, res) => {
   try {
-    const deal = await Deal.findById(req.params.id);
-    if (!deal) return res.status(404).json({ message: 'Deal not found' });
-    res.json(deal);
+    const product = await Product.findById(req.params.id);
+    if (!product) return res.status(404).json({ message: 'Product not found' });
+    res.json(product);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -63,13 +63,13 @@ exports.searchDeals = async (req, res) => {
     const skip = (currentPage - 1) * itemsPerPage;
 
     // Fetch deals from the database
-    const deals = await Deal.find(searchQuery)
+    const deals = await Product.find(searchQuery)
       .sort(sortOptions)
       .skip(skip)
       .limit(itemsPerPage);
 
     // Total count for pagination
-    const totalCount = await Deal.countDocuments(searchQuery);
+    const totalCount = await Product.countDocuments(searchQuery);
 
     res.json({
       data: deals,
@@ -90,7 +90,7 @@ exports.addNewDeal = async (req, res) => {
     const imagePath = req.files?.imagePath ? req.files.imagePath[0].filename.split('/').pop() : 'default.jpg';
     const barcodePath = req.files?.barcodePath ? req.files.barcodePath[0].filename.split('/').pop() : 'default.jpg';
 
-    const deal = new Deal({
+    const product = new Product({
       name: req.body.name,
       description: req.body.description,
       category: req.body.category,
@@ -102,7 +102,7 @@ exports.addNewDeal = async (req, res) => {
       createdBy: req.user._id, // Attach user ID from token
     });    
 
-    const newDeal = await deal.save();
+    const newDeal = await product.save();
     res.status(201).json(newDeal);
   } catch (err) {
     res.status(400).json({ message: err.message });
@@ -111,10 +111,10 @@ exports.addNewDeal = async (req, res) => {
 
 exports.updateDealById = async (req, res) => {
   try {
-    // Find the existing deal first
-    const existingDeal = await Deal.findById(req.params.id);
+    // Find the existing product first
+    const existingDeal = await Product.findById(req.params.id);
     if (!existingDeal) {
-      return res.status(404).json({ message: 'Deal not found' });
+      return res.status(404).json({ message: 'Product not found' });
     }
 
     // Handle uploaded files
@@ -132,7 +132,7 @@ exports.updateDealById = async (req, res) => {
     // Ensure we don't accidentally update `_id` or other immutable fields
     delete updateData._id;
 
-    const updatedDeal = await Deal.findByIdAndUpdate(req.params.id, updateData, { new: true, runValidators: true });
+    const updatedDeal = await Product.findByIdAndUpdate(req.params.id, updateData, { new: true, runValidators: true });
 
     res.json(updatedDeal);
   } catch (err) {
@@ -140,12 +140,12 @@ exports.updateDealById = async (req, res) => {
   }
 };
 
-// Delete a deal by ID
+// Delete a product by ID
 exports.deleteDealById = async (req, res) => {
   try {
-    const deletedDeal = await Deal.findByIdAndDelete(req.params.id);
-    if (!deletedDeal) return res.status(404).json({ message: 'Deal not found' });
-    res.json({ message: 'Deal deleted successfully' });
+    const deletedDeal = await Product.findByIdAndDelete(req.params.id);
+    if (!deletedDeal) return res.status(404).json({ message: 'Product not found' });
+    res.json({ message: 'Product deleted successfully' });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }

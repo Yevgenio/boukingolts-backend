@@ -1,4 +1,4 @@
-const Deal = require('../models/deal.model');
+const Product = require('../models/product.model');
 const Chat = require('../models/chat.model'); 
 const Search = require('../models/search.model'); 
 // const User = require('../models/user.model'); 
@@ -24,11 +24,11 @@ exports.globalSearch = async (req, res) => {
   try {
     const [deals, chats, dealsCount, chatsCount] = await Promise.all([
       // Fetch deals with pagination
-      Deal.find(searchQuery).skip(skip).limit(itemsPerPage),
+      Product.find(searchQuery).skip(skip).limit(itemsPerPage),
       // Fetch chats with pagination
       Chat.find(searchQuery).skip(skip).limit(itemsPerPage),
       // Total count for deals
-      Deal.countDocuments(searchQuery),
+      Product.countDocuments(searchQuery),
       // Total count for chats
       Chat.countDocuments(searchQuery),
     ]);

@@ -20,7 +20,7 @@ const dealSchema = new mongoose.Schema({
 //   category: 'text' 
 // });
 
-module.exports = mongoose.model('Deal', dealSchema);
+module.exports = mongoose.model('Product', dealSchema);
 
 // [
 //   {

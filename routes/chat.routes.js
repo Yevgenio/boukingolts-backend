@@ -11,9 +11,9 @@ router.get('/', chatController.getAllChats);
 // Route to get a specific chat by ID
 router.get('/id/:id', chatController.getChatById);
 
-router.get('/search', chatController.searchChats);    // GET deal by query
+router.get('/search', chatController.searchChats);    // GET product by query
 
-// POST new deal
+// POST new product
 router.post(
     '/',
     verifyToken, 
@@ -27,7 +27,7 @@ router.post(
     chatController.addNewChat
 );
 
-// PUT update deal by ID
+// PUT update product by ID
 router.put('/id/:id', 
     verifyToken, 
     verifyAdmin, 
@@ -39,7 +39,7 @@ router.put('/id/:id',
     ]),
     chatController.updateChatById);  
 
-// DELETE deal by ID
+// DELETE product by ID
 router.delete('/id/:id',
     verifyToken, 
     verifyAdmin, 

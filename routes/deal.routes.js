@@ -3,14 +3,14 @@ const router = express.Router();
 const mongoose = require('mongoose');
 
 const { verifyToken, verifyAdmin } = require('../middleware/auth.middleware');
-const dealController = require('../controllers/deal.controller');
+const dealController = require('../controllers/product.controller');
 const upload = require('../middleware/file.middleware'); 
  
 
 // GET all deals
 router.get('/', dealController.getAllDeals);
 
-// GET deal by ID
+// GET product by ID
 router.get('/id/:id', dealController.getDealById); 
  
 // GET deals by query
@@ -19,7 +19,7 @@ router.get('/search', dealController.searchDeals);
 // GET distinct categories
 router.get('/categories', dealController.getDistinctCategories);
 
-// POST new deal
+// POST new product
 router.post(
     '/', 
     verifyToken, 
@@ -35,7 +35,7 @@ router.post(
     dealController.addNewDeal
 );
 
-// PUT update deal by ID
+// PUT update product by ID
 router.put(
     '/id/:id',
     verifyToken,
@@ -47,7 +47,7 @@ router.put(
     dealController.updateDealById
   );
 
-// DELETE deal by ID
+// DELETE product by ID
 router.delete(
     '/id/:id',
     verifyToken,

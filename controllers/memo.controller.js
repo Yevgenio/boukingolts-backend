@@ -100,8 +100,8 @@ exports.addNewMemo = async (req, res) => {
     const memo = new Memo({
       name: req.body.name,
       description: req.body.description,
-      type: req.body.type, // 'deal', 'chat', 'external', 'blog'
-      targetId: req.body.targetId || null, // ID of chat/deal
+      type: req.body.type, // 'product', 'chat', 'external', 'blog'
+      targetId: req.body.targetId || null, // ID of chat/product
       externalLink: req.body.externalLink || null, // Direct external link
       immediateRedirect: req.body.immediateRedirect || false, // Immediate redirect or landing page
       imagePath: imagePath,
