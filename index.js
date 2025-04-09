@@ -29,7 +29,7 @@ mongoose.connect(process.env.MONGO_URI)
 
 // Root Route
 app.get('/api', (req, res) => {
-  res.send('Student 7 API');
+  res.send('System API status: OK');
 });
 
 // Set CORS headers for all routes
