@@ -25,7 +25,7 @@ router.post(
     verifyToken, 
     verifyAdmin, 
     upload.fields([
-      { name: 'images', maxCount: 10 }, // Allow up to 10 images
+      { name: 'images', maxCount: 30 }, // Allow up to 30 images
     ]),
     productController.addNewProduct
 );
@@ -36,7 +36,7 @@ router.put(
     verifyToken,
     verifyAdmin,
     upload.fields([
-      { name: 'images', maxCount: 30 }, // Allow up to 10 images
+      { name: 'images', maxCount: 30 }, // Allow up to 30 images
     ]),
     productController.updateProductById
   );
