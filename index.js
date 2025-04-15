@@ -6,7 +6,7 @@ const path = require('path');
 
 dotenv.config();
 
-console.log("GOOGLE_CLIENT_ID", process.env.GOOGLE_CLIENT_ID);
+console.log("GOOGLE_WEB_CLIENT_ID", process.env.GOOGLE_WEB_CLIENT_ID);
 
 const app = express();
 
