@@ -47,6 +47,6 @@ router.delete(
     verifyToken,
     verifyAdmin,
     productController.deleteProductById
-  );
+  ); 
   
 module.exports = router;
