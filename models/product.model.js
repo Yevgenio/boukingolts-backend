@@ -1,17 +1,14 @@
 const mongoose = require('mongoose');
 
+const imageSchema = new mongoose.Schema({
+  url: { type: String, required: true }
+});
+
 const productSchema = new mongoose.Schema({
-  name: { type: String, required: true },
-  description: { type: String, default: "" },
-  category: { type: String, default: "כללי" },
-  images: [{
-    url: { type: String},
-  }],
-  imagePath: {type: String, default: "default"},
-  barcodePath: {type: String, default: "default"},
-  stock: { type: Number, default: -1 },
-  startsAt: { type: Date, default: Date.now }, 
-  endsAt: { type: Date, default: null }, 
+  name: { type: String, default: "-"},
+  description: { type: String, default: "-" },
+  category: { type: String, default: "General" },
+  images: [imageSchema],
   createdAt: { type: Date, default: Date.now }, 
   createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: false }, // User field
 });

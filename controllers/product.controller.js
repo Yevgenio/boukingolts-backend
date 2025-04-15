@@ -85,22 +85,18 @@ exports.searchProducts = async (req, res) => {
 }
 
 exports.addNewProduct = async (req, res) => {
+  console.log('Request body:', req.body); // Log the request body for debugging
   try {
-    // Save the image path if a file was uploaded
-    const imagePath = req.files?.imagePath ? req.files.imagePath[0].filename.split('/').pop() : 'default.jpg';
-    const barcodePath = req.files?.barcodePath ? req.files.barcodePath[0].filename.split('/').pop() : 'default.jpg';
-
-    const images = req.files?.images?.map((file, index) => ({
-      url: file.filename.split('/').pop(),
-      order: index
-    })) || [];
+    const imageFiles = req.files?.images || [];
+    const images = imageFiles.map((file) => ({
+      url: file.filename.split('/').pop() //get last part of the path
+    }));
     
     const product = new Product({
       name: req.body.name,
       description: req.body.description,
       category: req.body.category,
-      imagePath: imagePath,
-      barcodePath: barcodePath,
+      images: images,
       stock: req.body.stock,
       startsAt: req.body.startsAt,
       endsAt: req.body.endsAt,
@@ -122,15 +118,11 @@ exports.updateProductById = async (req, res) => {
       return res.status(404).json({ message: 'Product not found' });
     }
 
-    // Handle uploaded files
-    const imagePath = req.files?.imagePath ? req.files.imagePath[0].filename.split('/').pop() : existingProduct.imagePath.split('/').pop();
-    const barcodePath = req.files?.barcodePath ? req.files.barcodePath[0].filename.split('/').pop() : existingProduct.barcodePath.split('/').pop();
-
     // Handle image updates
-    const newImages = req.files?.images?.map((file, index) => ({
-      url: file.filename.split('/').pop(),
-      order: existingProduct.images.length + index
-    })) || [];
+    const imageFiles = req.files?.images || [];
+    const newImages = imageFiles.map((file) => ({
+      url: file.filename.split('/').pop() //get last part of the path
+    }));
 
     const updatedImages = [...existingProduct.images, ...newImages];
     
@@ -139,11 +131,9 @@ exports.updateProductById = async (req, res) => {
       ...existingProduct.toObject(), // Start with the existing data
       ...req.body, // Overwrite with new data from the request
       images: updatedImages, // Use new images array
-      imagePath, // Use new or existing image path
-      barcodePath, // Use new or existing barcode path
     };
 
-    // Ensure we don't accidentally update `_id` or other immutable fields
+    // Ensure no update for `_id` field
     delete updateData._id;
 
     const updatedProduct = await Product.findByIdAndUpdate(req.params.id, updateData, { new: true, runValidators: true });
