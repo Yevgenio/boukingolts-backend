@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 
+//event alternative can be exhibition, sale, showcase, 
 const eventSchema = new mongoose.Schema({
   name: { type: String, required: true },
   description: String,
