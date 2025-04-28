@@ -40,6 +40,23 @@ exports.login = async (req, res) => {
       { expiresIn: '180d' } // 6 months
     );
 
+    // Set the access token as HTTP-only cookie
+    res.cookie('access_token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production', // Use HTTPS only in production
+      sameSite: 'Strict',
+      maxAge: 30 * 60 * 1000, // 30 minutes
+    });
+
+    // Optionally set refresh token too
+    res.cookie('refresh_token', refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'Strict',
+      maxAge: 3 * 30 * 24 * 60 * 60 * 1000, // 3 months
+    });
+
+
     res.status(200).json({ username, token, refreshToken });    
   } catch (err) {
     res.status(500).json({ message: 'Internal server error', error: err.message });
