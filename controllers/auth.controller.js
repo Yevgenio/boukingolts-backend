@@ -56,6 +56,14 @@ exports.login = async (req, res) => {
       maxAge: 3 * 30 * 24 * 60 * 60 * 1000, // 3 months
     });
 
+    // Server-side login endpoint (Node.js)
+    res.cookie('user_role', user.role, {
+      httpOnly: false, // You can make this false if you want to access it from client
+      secure: true,
+      sameSite: 'strict',
+      path: '/',
+      maxAge: 60 * 60 * 24, // 1 day
+    });
 
     res.status(200).json({ username, token, refreshToken });    
   } catch (err) {
@@ -88,6 +96,21 @@ exports.settings = async (req, res) => {
       return res.status(401).json({ message: 'Invalid token' });
     }
     res.status(500).json({ message: 'Server error', error });
+  }
+}
+
+exports.logout = async (req, res) => {
+  try {
+    // Clear the cookies
+    res.clearCookie('access_token');
+    res.clearCookie('refresh_token');
+    res.clearCookie('user_role');
+    
+    // TODO: maybe invalidate the refresh token in the database (if stored)
+
+    res.status(200).json({ message: 'Logged out successfully' });
+  } catch (err) {
+    res.status(500).json({ message: 'Internal server error', error: err.message });
   }
 }
 
