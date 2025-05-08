@@ -3,16 +3,27 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const path = require('path');
+const cookieParser = require('cookie-parser');
 
 dotenv.config();
 
-console.log("GOOGLE_WEB_CLIENT_ID", process.env.GOOGLE_WEB_CLIENT_ID);
-
 const app = express();
 
-
 // Middleware
-app.use(cors());
+// app.use(cors());
+// app.use(cors({
+//   origin: 'http://localhost:3000',
+//   credentials: true
+// }));
+
+app.use(cors({
+  origin: ['http://localhost:3000', 'https://boukingolts.art/'],
+  credentials: true,
+}));
+
+// Parse cookies
+app.use(cookieParser());
+
 app.use(express.json());
 
 // Apply logging middleware
@@ -32,16 +43,17 @@ mongoose.connect(process.env.MONGO_URI)
 
 // Root Route
 app.get('/api', (req, res) => {
-  res.send('System API status: OK');
+  res.send('System API active.');
 });
 
 // Set CORS headers for all routes
-app.use((req, res, next) => {
-  res.setHeader('Access-Control-Allow-Origin', '*'); // Allow all origins
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE'); // Allow specific HTTP methods
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization'); // Allow headers
-  next();
-});
+// app.use((req, res, next) => {
+//   res.setHeader('Access-Control-Allow-Origin', '*'); // Allow all origins
+//   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE'); // Allow specific HTTP methods
+//   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization'); // Allow headers
+//   next();
+// });
+
 
 // Log Routes
 const logRoutes = require('./routes/log.routes');

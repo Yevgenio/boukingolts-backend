@@ -3,14 +3,20 @@ const router = express.Router();
 // const jwt = require('jsonwebtoken');
 // const bcrypt = require('bcrypt');
 const authController = require('../controllers/auth.controller');
-const { verifyToken, verifyAdmin } = require('../middleware/auth.middleware');
+const { verifyToken } = require('../middleware/auth.middleware');
 const User = require('../models/user.model'); // Adjust the path based on your project structure
 
 // const User = require('../models/user.model');
 
+router.get('/me', verifyToken, authController.me);
+
+router.get('/status', verifyToken, authController.status);
+
 router.post('/signup', authController.signup);
 
 router.post('/login', authController.login);
+
+router.get('/logout', verifyToken, authController.logout);
 
 router.get('/settings', verifyToken, authController.settings);
 
