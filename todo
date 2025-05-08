@@ -1,0 +1,7 @@
+Logging IP can be spoofed
+Rate limiting / brute force protection missing
+No CSRF protection
+Global search scalability risk
+No soft-delete for resources
+Uploads folder not protected
+Password reset & email verification missing

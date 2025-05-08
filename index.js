@@ -27,7 +27,7 @@ app.use(cookieParser());
 app.use(express.json());
 
 // Apply logging middleware
-// app.set('trust proxy', true); // Trust AWS proxy to get real IP address
+app.set('trust proxy', true); // Trust AWS proxy to get real IP address
 
 //const { verifyToken } = require('./middleware/auth.middleware');
 // app.use(verifyToken); // Ensure the user is authenticated first

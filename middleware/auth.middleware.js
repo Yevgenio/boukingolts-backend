@@ -41,7 +41,7 @@ exports.verifyToken = async (req, res, next) => {
       req.user = user; // Attach user to request object
 
       const newAccessToken = jwt.sign(
-        { userId: user.userId },
+        { userId: userId },
         process.env.JWT_SECRET,
         { expiresIn: '1h' }
       );
