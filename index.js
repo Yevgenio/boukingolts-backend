@@ -79,6 +79,10 @@ app.use('/api/products', productRoutes);
 const memoRoutes = require('./routes/memo.routes');
 app.use('/api/memos', memoRoutes);
 
+// Content Routes
+const contentRoutes = require('./routes/content.routes');
+app.use('/api/content', contentRoutes);
+
 // Search Routes
 const searchRoutes = require('./routes/search.routes');
 app.use('/api/search', searchRoutes);
