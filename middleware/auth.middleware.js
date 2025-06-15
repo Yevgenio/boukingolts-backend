@@ -2,8 +2,6 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/user.model');
 
 exports.verifyToken = async (req, res, next) => {
-
-  console.log('Verifying token...');
   let access_token = req.cookies?.access_token;
   let refresh_token = req.cookies?.refresh_token;
 
@@ -14,7 +12,6 @@ exports.verifyToken = async (req, res, next) => {
   }
 
   if (access_token) {
-    console.log('Access token found:', access_token);
     try {
       const decoded = jwt.verify(access_token, process.env.JWT_SECRET);
       const userId = decoded.userId;
@@ -29,10 +26,9 @@ exports.verifyToken = async (req, res, next) => {
       // fall through to refresh handling
     }
   }
-  console.log('Access token expired or not found:', access_token);
+
   // Try refreshing if access token is missing or expired
   if (refresh_token) {
-    console.log('Refresh token found:', refresh_token);
     try {
       const decodedRefresh = jwt.verify(refresh_token, process.env.JWT_SECRET);
       const userId = decodedRefresh.userId;
@@ -54,23 +50,20 @@ exports.verifyToken = async (req, res, next) => {
         maxAge: 60 * 60 * 1000, // 1 hour
       });
       
-      console.log('User found:', user);
       return next();
     } catch (refreshErr) {
       return res.status(401).json({ message: 'Invalid or expired refresh token' });
     }
   }
-  console.log('No valid token found:', access_token, refresh_token);
+
   return res.status(403).json({ message: 'No valid token provided' });
 };
 
 // Middleware to check if the user is an admin
 exports.verifyAdmin = (req, res, next) => {
-  console.log('User:', req.user); // Log the user ID for debugging
   const user = req.user;
   if (!req.user || req.user.role !== 'admin') {
     return res.status(403).json({ message: 'Admin access only.' });
   }
-  console.log('User is admin, proceeding...');
   next();
 };

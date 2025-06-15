@@ -85,7 +85,6 @@ exports.searchProducts = async (req, res) => {
 }
 
 exports.addNewProduct = async (req, res) => {
-  console.log('Adding new product...');
   try {
     const imageFiles = req.files?.images || [];
     const images = imageFiles.map((file) => ({

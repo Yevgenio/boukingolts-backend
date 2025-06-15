@@ -10,7 +10,6 @@ const COOKIE_OPTIONS = {
 };
 
 exports.me = async (req, res) => {
-  console.log('Fetching user data...', req.user);
   try {
     const user = req.user;
     // Respond with the user data
@@ -37,8 +36,7 @@ exports.status = async (req, res) => {
 };
 
 exports.signup = async (req, res) => {
-  console.log('SIGNUP BODY:', req.body); 
-  
+
   try {
     const hashedPassword = await bcrypt.hash(req.body.password, 10);
     const user = new User({
