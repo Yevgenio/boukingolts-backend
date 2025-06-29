@@ -24,7 +24,9 @@ app.use(cors({
 // Parse cookies
 app.use(cookieParser());
 
-app.use(express.json());
+// app.use(express.json());
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
 // Apply logging middleware
 app.set('trust proxy', true); // Trust AWS proxy to get real IP address
@@ -40,20 +42,10 @@ mongoose.connect(process.env.MONGO_URI)
     .then(() => console.log('MongoDB connected'))
     .catch(err => console.log(err));
 
-
 // Root Route
 app.get('/api', (req, res) => {
   res.send('System API active.');
 });
-
-// Set CORS headers for all routes
-// app.use((req, res, next) => {
-//   res.setHeader('Access-Control-Allow-Origin', '*'); // Allow all origins
-//   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE'); // Allow specific HTTP methods
-//   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization'); // Allow headers
-//   next();
-// });
-
 
 // Log Routes
 const logRoutes = require('./routes/log.routes');
