@@ -91,11 +91,9 @@ exports.searchProducts = async (req, res) => {
 }
 
 exports.addNewProduct = async (req, res) => {
-  console.log('Received request to add new product:', req.body);
 
   try {
     const imageFiles = req.files?.images || [];
-    console.log('Image files received:', imageFiles);
 
     const images = imageFiles.map((file) => {
       const filePath = path.join(__dirname, '../uploads', file.filename);
@@ -107,7 +105,6 @@ exports.addNewProduct = async (req, res) => {
         const dimensions = sizeOf(filePath);
         width = dimensions.width;
         height = dimensions.height;
-        console.log('Image dimensions calculated:', dimensions);
       } catch (error) {
         console.error('Failed to get image dimensions:', error.message);
       }
@@ -130,7 +127,6 @@ exports.addNewProduct = async (req, res) => {
       createdBy: req.user._id,
     });
 
-    console.log('New product data:', product);
     const newProduct = await product.save();
     res.status(201).json(newProduct);
   } catch (err) {
@@ -157,7 +153,6 @@ exports.updateProductById = async (req, res) => {
         const dimensions = sizeOf(filePath);
         width = dimensions.width;
         height = dimensions.height;
-        console.log('Image dimensions calculated:', dimensions);
       } catch (error) {
         console.error(`Failed to get dimensions for ${file.filename}:`, error.message);
       }
@@ -169,8 +164,8 @@ exports.updateProductById = async (req, res) => {
       };
     });
 
-    //const updatedImages = [...existingProduct.images, ...newImages];
-    const updatedImages = [...newImages];
+    const updatedImages = [...existingProduct.images, ...newImages];
+    // const updatedImages = [...newImages];
 
     const updateData = {
       name: req.body.name || existingProduct.name,
