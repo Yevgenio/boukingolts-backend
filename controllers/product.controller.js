@@ -1,4 +1,10 @@
 const Product = require('../models/product.model'); // Assuming you have a Product model defined
+// const sizeOf = require('image-size');
+const fs = require('fs');
+const path = require('path');
+
+const rawSizeOf = require('image-size');
+const sizeOf = rawSizeOf.default || rawSizeOf;
 
 exports.getDistinctCategories = async (req, res) => {
   try {
@@ -85,23 +91,46 @@ exports.searchProducts = async (req, res) => {
 }
 
 exports.addNewProduct = async (req, res) => {
+  console.log('Received request to add new product:', req.body);
+
   try {
     const imageFiles = req.files?.images || [];
-    const images = imageFiles.map((file) => ({
-      url: file.filename.split('/').pop() //get last part of the path
-    }));
-    
+    console.log('Image files received:', imageFiles);
+
+    const images = imageFiles.map((file) => {
+      const filePath = path.join(__dirname, '../uploads', file.filename);
+
+      let width = 0;
+      let height = 0;
+
+      try {
+        const dimensions = sizeOf(filePath);
+        width = dimensions.width;
+        height = dimensions.height;
+        console.log('Image dimensions calculated:', dimensions);
+      } catch (error) {
+        console.error('Failed to get image dimensions:', error.message);
+      }
+
+      return {
+        url: file.filename.split('/').pop(),
+        width,
+        height,
+      };
+    });
+
     const product = new Product({
       name: req.body.name,
       description: req.body.description,
       category: req.body.category,
-      images: images,
+      images,
       stock: req.body.stock,
       startsAt: req.body.startsAt,
       endsAt: req.body.endsAt,
-      createdBy: req.user._id, // Attach user ID from token
-    });    
+      createdBy: req.user._id,
+    });
 
+    console.log('New product data:', product);
     const newProduct = await product.save();
     res.status(201).json(newProduct);
   } catch (err) {
@@ -111,31 +140,39 @@ exports.addNewProduct = async (req, res) => {
 
 exports.updateProductById = async (req, res) => {
   try {
-    // Find the existing product first
     const existingProduct = await Product.findById(req.params.id);
     if (!existingProduct) {
       return res.status(404).json({ message: 'Product not found' });
     }
 
-    // Handle image updates
     const imageFiles = req.files?.images || [];
-    const newImages = imageFiles.map((file) => ({
-      url: file.filename.split('/').pop() //get last part of the path
-    }));
+
+    const newImages = imageFiles.map((file) => {
+      const filePath = path.join(__dirname, '../uploads', file.filename);
+      const dimensions = sizeOf(filePath);
+
+      return {
+        url: file.filename.split('/').pop(),
+        width: dimensions.width,
+        height: dimensions.height,
+      };
+    });
 
     const updatedImages = [...existingProduct.images, ...newImages];
-    
-    // Prepare the update data
+
     const updateData = {
-      ...existingProduct.toObject(), // Start with the existing data
-      ...req.body, // Overwrite with new data from the request
-      images: updatedImages, // Use new images array
+      ...existingProduct.toObject(),
+      ...req.body,
+      images: updatedImages,
     };
 
-    // Ensure no update for `_id` field
     delete updateData._id;
 
-    const updatedProduct = await Product.findByIdAndUpdate(req.params.id, updateData, { new: true, runValidators: true });
+    const updatedProduct = await Product.findByIdAndUpdate(
+      req.params.id,
+      updateData,
+      { new: true, runValidators: true }
+    );
 
     res.json(updatedProduct);
   } catch (err) {
