@@ -105,7 +105,7 @@ exports.addNewProduct = async (req, res) => {
       const thumbnailFilename = `${baseName}-thumb${ext}`;
       const originalOut = path.join(__dirname, '../uploads', originalFilename);
       const thumbOut = path.join(__dirname, '../uploads', thumbnailFilename);
-
+      console.log('thumbOut Path:', thumbOut);
       // Move the uploaded file to the original slot
       fs.renameSync(originalPath, originalOut);
 
@@ -128,6 +128,8 @@ exports.addNewProduct = async (req, res) => {
         height,
       };
     }));
+
+    console.log('Images:', images);
 
     const product = new Product({
       name: req.body.name,

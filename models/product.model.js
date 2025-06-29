@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 
 const imageSchema = new mongoose.Schema({
   url: { type: String, required: true },
+  thumbnail: { type: String, required: true },
   width: Number,
   height: Number,
 });
