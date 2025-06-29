@@ -169,7 +169,8 @@ exports.updateProductById = async (req, res) => {
       };
     });
 
-    const updatedImages = [...existingProduct.images, ...newImages];
+    //const updatedImages = [...existingProduct.images, ...newImages];
+    const updatedImages = [...newImages];
 
     const updateData = {
       name: req.body.name || existingProduct.name,
