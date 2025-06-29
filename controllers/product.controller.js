@@ -149,24 +149,37 @@ exports.updateProductById = async (req, res) => {
 
     const newImages = imageFiles.map((file) => {
       const filePath = path.join(__dirname, '../uploads', file.filename);
-      const dimensions = sizeOf(filePath);
+
+      let width = 0;
+      let height = 0;
+
+      try {
+        const dimensions = sizeOf(filePath);
+        width = dimensions.width;
+        height = dimensions.height;
+        console.log('Image dimensions calculated:', dimensions);
+      } catch (error) {
+        console.error(`Failed to get dimensions for ${file.filename}:`, error.message);
+      }
 
       return {
         url: file.filename.split('/').pop(),
-        width: dimensions.width,
-        height: dimensions.height,
+        width,
+        height,
       };
     });
 
     const updatedImages = [...existingProduct.images, ...newImages];
 
     const updateData = {
-      ...existingProduct.toObject(),
-      ...req.body,
+      name: req.body.name || existingProduct.name,
+      description: req.body.description || existingProduct.description,
+      category: req.body.category || existingProduct.category,
+      stock: req.body.stock ?? existingProduct.stock,
+      startsAt: req.body.startsAt || existingProduct.startsAt,
+      endsAt: req.body.endsAt || existingProduct.endsAt,
       images: updatedImages,
     };
-
-    delete updateData._id;
 
     const updatedProduct = await Product.findByIdAndUpdate(
       req.params.id,
@@ -176,9 +189,11 @@ exports.updateProductById = async (req, res) => {
 
     res.json(updatedProduct);
   } catch (err) {
+    console.error('Update failed:', err);
     res.status(400).json({ message: err.message });
   }
 };
+
 
 // Delete a product by ID
 exports.deleteProductById = async (req, res) => {
