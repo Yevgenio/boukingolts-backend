@@ -90,40 +90,50 @@ exports.searchProducts = async (req, res) => {
   }
 }
 
-exports.addNewProduct = async (req, res) => {
+const sharp = require('sharp');
 
+exports.addNewProduct = async (req, res) => {
   try {
     const imageFiles = req.files?.images || [];
 
-    const images = imageFiles.map((file) => {
-      const filePath = path.join(__dirname, '../uploads', file.filename);
+    const images = await Promise.all(imageFiles.map(async (file) => {
+      const baseName = file.filename.split('.').slice(0, -1).join('.');
+      const ext = path.extname(file.filename);
+      const originalPath = path.join(__dirname, '../uploads', file.filename);
 
-      let width = 0;
-      let height = 0;
+      const originalFilename = `${baseName}-original${ext}`;
+      const thumbnailFilename = `${baseName}-thumb${ext}`;
+      const originalOut = path.join(__dirname, '../uploads', originalFilename);
+      const thumbOut = path.join(__dirname, '../uploads', thumbnailFilename);
 
+      // Move the uploaded file to the original slot
+      fs.renameSync(originalPath, originalOut);
+
+      let width = 0, height = 0;
       try {
-        const dimensions = sizeOf(filePath);
-        width = dimensions.width;
-        height = dimensions.height;
-      } catch (error) {
-        console.error('Failed to get image dimensions:', error.message);
+        const metadata = await sharp(originalOut)
+          .resize({ width: 400 }) // or 300 depending on your thumbnail needs
+          .toFile(thumbOut);      // generate thumbnail
+
+        width = metadata.width;
+        height = metadata.height;
+      } catch (err) {
+        console.error('Sharp resize error:', err.message);
       }
 
       return {
-        url: file.filename.split('/').pop(),
+        url: originalFilename,
+        thumbnail: thumbnailFilename,
         width,
         height,
       };
-    });
+    }));
 
     const product = new Product({
       name: req.body.name,
       description: req.body.description,
       category: req.body.category,
       images,
-      stock: req.body.stock,
-      startsAt: req.body.startsAt,
-      endsAt: req.body.endsAt,
       createdBy: req.user._id,
     });
 
@@ -133,6 +143,7 @@ exports.addNewProduct = async (req, res) => {
     res.status(400).json({ message: err.message });
   }
 };
+
 
 exports.updateProductById = async (req, res) => {
   try {

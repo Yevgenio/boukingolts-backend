@@ -8,7 +8,10 @@ exports.serveFile = (req, res) => {
 
   // Check if the file exists
   if (fs.existsSync(filePath)) {
-    res.sendFile(filePath);
+    // res.sendFile(filePath);
+    app.use('/uploads', express.static(path.join(__dirname, 'uploads'), {
+    maxAge: '30d',
+}));
   } else {
     // Serve default.png if the requested file doesn't exist
     const defaultPath = path.join(__dirname, '..', 'uploads', 'default.jpg');
