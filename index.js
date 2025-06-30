@@ -9,13 +9,6 @@ dotenv.config();
 
 const app = express();
 
-// Middleware
-// app.use(cors());
-// app.use(cors({
-//   origin: 'http://localhost:3000',
-//   credentials: true
-// }));
-
 app.use(cors({
   origin: ['http://localhost:3000', 'https://boukingolts.art/'],
   credentials: true,
@@ -59,17 +52,17 @@ app.use('/api/auth', authRoutes);
 const userRoutes = require('./routes/user.routes');
 app.use('/api/user', userRoutes);
 
-// Event Routes
-const eventRoutes = require('./routes/event.routes');
-app.use('/api/events', eventRoutes);
+// // Event Routes
+// const eventRoutes = require('./routes/event.routes');
+// app.use('/api/events', eventRoutes);
 
 // Product Routes
 const productRoutes = require('./routes/product.routes');
 app.use('/api/products', productRoutes);
 
-// Memo Routes
-const memoRoutes = require('./routes/memo.routes');
-app.use('/api/memos', memoRoutes);
+// // Memo Routes
+// const memoRoutes = require('./routes/memo.routes');
+// app.use('/api/memos', memoRoutes);
 
 // Content Routes
 const contentRoutes = require('./routes/content.routes');

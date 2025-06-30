@@ -3,7 +3,7 @@ const router = express.Router();
 
 const { verifyToken, verifyAdmin } = require('../middleware/auth.middleware');
 const eventController = require('../controllers/event.controller');
-const upload = require('../middleware/file.middleware'); 
+const { upload, processUploadedImages } = require('../middleware/file.middleware');
 
 // GET all products
 router.get('/', eventController.getAllEvents);         
@@ -18,12 +18,7 @@ router.post(
     '/',
     verifyToken, 
     verifyAdmin, 
-    upload.fields([
-        { 
-            name: 'imagePath', 
-            maxCount: 1 
-        }
-    ]),
+    upload,
     eventController.addNewEvent
 );
 
@@ -31,12 +26,7 @@ router.post(
 router.put('/id/:id', 
     verifyToken, 
     verifyAdmin, 
-    upload.fields([
-        { 
-            name: 'imagePath', 
-            maxCount: 1 
-        }
-    ]),
+    upload,
     eventController.updateEventById);  
 
 // DELETE product by ID

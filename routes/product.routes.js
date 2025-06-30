@@ -4,7 +4,7 @@ const mongoose = require('mongoose');
 
 const { verifyToken, verifyAdmin } = require('../middleware/auth.middleware');
 const productController = require('../controllers/product.controller');
-const upload = require('../middleware/file.middleware'); 
+const { upload, processUploadedImages } = require('../middleware/file.middleware');
  
 
 // GET all products
@@ -22,23 +22,21 @@ router.get('/categories', productController.getDistinctCategories);
 // POST new product
 router.post(
     '/', 
-    verifyToken, 
-    verifyAdmin, 
-    upload.fields([
-      { name: 'images', maxCount: 30 }, // Allow up to 30 images
-    ]),
-    productController.addNewProduct
+    verifyToken, // Verify user token
+    verifyAdmin, // Verify admin access
+    upload, // Upload images
+    processUploadedImages, // Process uploaded images
+    productController.addNewProduct // Add new product
 );
 
 // PUT update product by ID
 router.put(
     '/id/:id',
-    verifyToken,
-    verifyAdmin,
-    upload.fields([
-      { name: 'images', maxCount: 30 }, // Allow up to 30 images
-    ]),
-    productController.updateProductById
+    verifyToken, // Verify user token
+    verifyAdmin, // Verify admin access
+    upload, // Upload images
+    processUploadedImages, // Process uploaded images
+    productController.updateProductById // Update product by ID
   );
 
 // DELETE product by ID

@@ -90,52 +90,13 @@ exports.searchProducts = async (req, res) => {
   }
 }
 
-const sharp = require('sharp');
-
 exports.addNewProduct = async (req, res) => {
   try {
-    const imageFiles = req.files?.images || [];
-
-    const images = await Promise.all(imageFiles.map(async (file) => {
-      const baseName = file.filename.split('.').slice(0, -1).join('.');
-      const ext = path.extname(file.filename);
-      const originalPath = path.join(__dirname, '../uploads', file.filename);
-
-      const originalFilename = `${baseName}-original${ext}`;
-      const thumbnailFilename = `${baseName}-thumb${ext}`;
-      const originalOut = path.join(__dirname, '../uploads', originalFilename);
-      const thumbOut = path.join(__dirname, '../uploads', thumbnailFilename);
-      console.log('thumbOut Path:', thumbOut);
-      // Move the uploaded file to the original slot
-      fs.renameSync(originalPath, originalOut);
-
-      let width = 0, height = 0;
-      try {
-        const metadata = await sharp(originalOut)
-          .resize({ width: 400 }) // or 300 depending on your thumbnail needs
-          .toFile(thumbOut);      // generate thumbnail
-
-        width = metadata.width;
-        height = metadata.height;
-      } catch (err) {
-        console.error('Sharp resize error:', err.message);
-      }
-
-      return {
-        url: originalFilename,
-        thumbnail: thumbnailFilename,
-        width,
-        height,
-      };
-    }));
-
-    console.log('Images:', images);
-
     const product = new Product({
       name: req.body.name,
       description: req.body.description,
       category: req.body.category,
-      images,
+      images: req.processedImages || [],
       createdBy: req.user._id,
     });
 
@@ -146,7 +107,6 @@ exports.addNewProduct = async (req, res) => {
   }
 };
 
-
 exports.updateProductById = async (req, res) => {
   try {
     const existingProduct = await Product.findById(req.params.id);
@@ -154,30 +114,8 @@ exports.updateProductById = async (req, res) => {
       return res.status(404).json({ message: 'Product not found' });
     }
 
-    const imageFiles = req.files?.images || [];
-
-    const newImages = imageFiles.map((file) => {
-      const filePath = path.join(__dirname, '../uploads', file.filename);
-
-      let width = 0;
-      let height = 0;
-
-      try {
-        const dimensions = sizeOf(filePath);
-        width = dimensions.width;
-        height = dimensions.height;
-      } catch (error) {
-        console.error(`Failed to get dimensions for ${file.filename}:`, error.message);
-      }
-
-      return {
-        url: file.filename.split('/').pop(),
-        width,
-        height,
-      };
-    });
-
-    const updatedImages = [...existingProduct.images, ...newImages];
+    const imageFiles = req.processedImages || []; // Use processed images from middleware
+    const updatedImages = [...existingProduct.images, ...imageFiles]; // Combine existing images with new ones
     // const updatedImages = [...newImages];
 
     const updateData = {
@@ -202,7 +140,6 @@ exports.updateProductById = async (req, res) => {
     res.status(400).json({ message: err.message });
   }
 };
-
 
 // Delete a product by ID
 exports.deleteProductById = async (req, res) => {
