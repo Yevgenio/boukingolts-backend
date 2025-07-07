@@ -6,3 +6,7 @@
 
 #
 required
+
+# image uploads 
+/uploads/*
+!uploads/default.jpg
