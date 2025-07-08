@@ -83,16 +83,11 @@ exports.searchProducts = async (req, res) => {
 
 exports.addNewProduct = async (req, res) => {
   try {
-    let imageDocs = [];
-    if (req.processedImages) {
-      imageDocs = await Image.insertMany(req.processedImages);
-    }
-
     const product = new Product({
       name: req.body.name,
       description: req.body.description,
       category: req.body.category,
-      images: imageDocs.map(img => img._id),
+      images: req.processedImages || [],
       createdBy: req.user._id,
     });
 
@@ -106,26 +101,19 @@ exports.addNewProduct = async (req, res) => {
 
 exports.updateProductById = async (req, res) => {
   try {
-    const existingProduct = await Product.findById(req.params.id);
-    if (!existingProduct) {
+    const product = req.currentProduct || await Product.findById(req.params.id);
+    if (!product) {
       return res.status(404).json({ message: 'Product not found' });
     }
 
-    let newImages = [];
-    if (req.processedImages) {
-      newImages = await Image.insertMany(req.processedImages);
-    }
-
-    const updatedImages = [...existingProduct.images, ...newImages.map(i => i._id)];
-
     const updateData = {
-      name: req.body.name || existingProduct.name,
-      description: req.body.description || existingProduct.description,
-      category: req.body.category || existingProduct.category,
-      stock: req.body.stock ?? existingProduct.stock,
-      startsAt: req.body.startsAt || existingProduct.startsAt,
-      endsAt: req.body.endsAt || existingProduct.endsAt,
-      images: updatedImages,
+      name: req.body.name || product.name,
+      description: req.body.description || product.description,
+      category: req.body.category || product.category,
+      stock: req.body.stock ?? product.stock,
+      startsAt: req.body.startsAt || product.startsAt,
+      endsAt: req.body.endsAt || product.endsAt,
+      images: req.processedImages || product.images,
     };
 
     const updatedProduct = await Product.findByIdAndUpdate(

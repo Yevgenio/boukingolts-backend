@@ -2,6 +2,7 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 const sharp = require('sharp');
+const Image = require('../models/image.model');
 
 // Configure storage for uploaded files
 const storage = multer.diskStorage({
@@ -54,6 +55,7 @@ const processUploadedImages = async (req, res, next) => {
 
         // Return processed image info
         return {  
+          filename: file.originalname, // Original filename
           url: originalFilename,
           thumbnail: thumbnailFilename,
           width: metadata.width,
@@ -69,7 +71,77 @@ const processUploadedImages = async (req, res, next) => {
   }
 };
 
+// 👇 Middleware to sync uploaded and existing images based on sortedImages
+const manageProductImages = async (req, res, next) => {
+  try {
+    // Insert new images if any were processed
+    let newDocs = [];
+    if (Array.isArray(req.processedImages) && req.processedImages.length) {
+      newDocs = await Image.insertMany(req.processedImages);
+    }
+
+    const uploadedFiles = req.files?.images || [];
+    const filenameMap = {};
+    uploadedFiles.forEach((file, idx) => {
+      if (newDocs[idx]) {
+        filenameMap[file.originalname] = newDocs[idx]._id.toString();
+      }
+    });
+
+    let sorted = [];
+    if (req.body.sortedImages) {
+      try {
+        sorted = JSON.parse(req.body.sortedImages);
+      } catch (_) {
+        sorted = [];
+      }
+    }
+
+    const finalIds = [];
+    sorted.forEach((img) => {
+      if (img.new) {
+        const id = filenameMap[img.filename];
+        if (id) finalIds.push(id);
+      } else if (img.id) {
+        finalIds.push(img.id);
+      }
+    });
+
+    // Remove any new images that were uploaded but not used
+    const unusedIds = newDocs
+      .map((d) => d._id.toString())
+      .filter((id) => !finalIds.includes(id));
+    if (unusedIds.length) {
+      await Image.deleteMany({ _id: { $in: unusedIds } });
+    }
+
+    // if (req.params.id) {
+    //   const product = await Product.findById(req.params.id);
+    //   if (!product) {
+    //     return res.status(404).json({ message: 'Product not found' });
+    //   }
+
+    //   const removedIds = product.images
+    //     .map((id) => id.toString())
+    //     .filter((id) => !finalIds.includes(id));
+    //   if (removedIds.length) {
+    //     await Image.deleteMany({ _id: { $in: removedIds } });
+    //   }
+
+    //   req.currentProduct = product;
+    // }
+
+    req.processedImages = finalIds;
+
+    next();
+  } catch (err) {
+    console.error('manageProductImages failed:', err.message);
+    res.status(500).json({ message: 'Image update failed', error: err.message });
+  }
+};
+
 module.exports = {
   upload,
   processUploadedImages,
+  manageProductImages,
 };

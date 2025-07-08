@@ -2,9 +2,9 @@ const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
 
-const { verifyToken, verifyAdmin } = require('../middleware/auth.middleware');
+const { verifyToken , verifyAdmin } = require('../middleware/auth.middleware');
 const productController = require('../controllers/product.controller');
-const { upload, processUploadedImages } = require('../middleware/file.middleware');
+const { upload , processUploadedImages , manageProductImages  } = require('../middleware/file.middleware');
  
 
 // GET all products
@@ -26,6 +26,7 @@ router.post(
     verifyAdmin, // Verify admin access
     upload, // Upload images
     processUploadedImages, // Process uploaded images
+    manageProductImages,
     productController.addNewProduct // Add new product
 );
 
@@ -36,6 +37,7 @@ router.put(
     verifyAdmin, // Verify admin access
     upload, // Upload images
     processUploadedImages, // Process uploaded images
+    manageProductImages,
     productController.updateProductById // Update product by ID
   );
 
