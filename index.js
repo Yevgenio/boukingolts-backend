@@ -76,6 +76,10 @@ app.use('/api/search', searchRoutes);
 const fileRoutes = require('./routes/file.routes');
 app.use('/api/uploads', fileRoutes);
 
+// Image Management Routes
+const imageRoutes = require('./routes/image.routes');
+app.use('/api/images', imageRoutes);
+
 const passport = require('passport');
 require('./config/google.strategy'); // Load the Google strategy
 app.use(passport.initialize());

@@ -1,10 +1,5 @@
-const Product = require('../models/product.model'); // Assuming you have a Product model defined
-// const sizeOf = require('image-size');
-const fs = require('fs');
-const path = require('path');
-
-const rawSizeOf = require('image-size');
-const sizeOf = rawSizeOf.default || rawSizeOf;
+const Product = require('../models/product.model');
+const Image = require('../models/image.model');
 
 exports.getDistinctCategories = async (req, res) => {
   try {
@@ -17,17 +12,17 @@ exports.getDistinctCategories = async (req, res) => {
 
 exports.getAllProducts = async (req, res) => {
   try {
-    const products = await Product.find();
+    const products = await Product.find().populate('images');
     res.json(products);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
-}
+};
 
 // Get a product by ID
 exports.getProductById = async (req, res) => {
   try {
-    const product = await Product.findById(req.params.id);
+    const product = await Product.findById(req.params.id).populate('images');
     if (!product) return res.status(404).json({ message: 'Product not found' });
     res.json(product);
   } catch (err) {
@@ -41,40 +36,36 @@ exports.searchProducts = async (req, res) => {
     const { query, category, sort, limit, page } = req.query;
 
     // Build query object
-    const searchQuery  = {};
+    const searchQuery = {};
     if (query) {
-      searchQuery .$or = [
-        { name: { $regex: query, $options: 'i' } }, // Case-insensitive search
+      searchQuery.$or = [
+        { name: { $regex: query, $options: 'i' } },
         { description: { $regex: query, $options: 'i' } },
-        { category: { $regex: query, $options: 'i' } }, // Partial match in category 
+        { category: { $regex: query, $options: 'i' } },
       ];
     }
 
-    // Check for empty or null category
     if (category === '') {
       searchQuery.category = { $in: [null, ''] };
     } else if (category) {
-      searchQuery.category = category; // Filter by exact category match
+      searchQuery.category = category;
     }
 
-    // Define sort options
     const sortOptions = {};
     if (sort === 'recent') {
-      sortOptions.createdAt = -1; // Sort by most recent
+      sortOptions.createdAt = -1;
     }
 
-    // Pagination (defaults to 10 items per page)
-    const itemsPerPage = parseInt(limit) || 100; //need better logic
+    const itemsPerPage = parseInt(limit) || 100;
     const currentPage = parseInt(page) || 1;
     const skip = (currentPage - 1) * itemsPerPage;
 
-    // Fetch products from the database
     const products = await Product.find(searchQuery)
+      .populate('images')
       .sort(sortOptions)
       .skip(skip)
       .limit(itemsPerPage);
 
-    // Total count for pagination
     const totalCount = await Product.countDocuments(searchQuery);
 
     res.json({
@@ -88,19 +79,25 @@ exports.searchProducts = async (req, res) => {
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
-}
+};
 
 exports.addNewProduct = async (req, res) => {
   try {
+    let imageDocs = [];
+    if (req.processedImages) {
+      imageDocs = await Image.insertMany(req.processedImages);
+    }
+
     const product = new Product({
       name: req.body.name,
       description: req.body.description,
       category: req.body.category,
-      images: req.processedImages || [],
+      images: imageDocs.map(img => img._id),
       createdBy: req.user._id,
     });
 
     const newProduct = await product.save();
+    await newProduct.populate('images');
     res.status(201).json(newProduct);
   } catch (err) {
     res.status(400).json({ message: err.message });
@@ -114,9 +111,12 @@ exports.updateProductById = async (req, res) => {
       return res.status(404).json({ message: 'Product not found' });
     }
 
-    const imageFiles = req.processedImages || []; // Use processed images from middleware
-    const updatedImages = [...existingProduct.images, ...imageFiles]; // Combine existing images with new ones
-    // const updatedImages = [...newImages];
+    let newImages = [];
+    if (req.processedImages) {
+      newImages = await Image.insertMany(req.processedImages);
+    }
+
+    const updatedImages = [...existingProduct.images, ...newImages.map(i => i._id)];
 
     const updateData = {
       name: req.body.name || existingProduct.name,
@@ -132,7 +132,7 @@ exports.updateProductById = async (req, res) => {
       req.params.id,
       updateData,
       { new: true, runValidators: true }
-    );
+    ).populate('images');
 
     res.json(updatedProduct);
   } catch (err) {
@@ -146,9 +146,9 @@ exports.deleteProductById = async (req, res) => {
   try {
     const deletedProduct = await Product.findByIdAndDelete(req.params.id);
     if (!deletedProduct) return res.status(404).json({ message: 'Product not found' });
+    await Image.deleteMany({ _id: { $in: deletedProduct.images } });
     res.json({ message: 'Product deleted successfully' });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 };
-  
