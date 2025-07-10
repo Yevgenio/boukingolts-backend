@@ -10,6 +10,12 @@ const { upload , processUploadedImages , manageProductImages  } = require('../mi
 // GET all products
 router.get('/', productController.getAllProducts);
 
+// GET products ordered by rank
+router.get('/ranked', productController.getProductsByRank);
+
+// GET featured products
+router.get('/featured', productController.getFeaturedProducts);
+
 // GET product by ID
 router.get('/id/:id', productController.getProductById); 
  

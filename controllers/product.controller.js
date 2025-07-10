@@ -19,6 +19,29 @@ exports.getAllProducts = async (req, res) => {
   }
 };
 
+exports.getProductsByRank = async (req, res) => {
+  try {
+    const products = await Product.find()
+      .populate('images')
+      .sort({ rank: -1 });
+    res.json(products);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+exports.getFeaturedProducts = async (req, res) => {
+  try {
+    const products = await Product.find({ featured: { $ne: 0 } })
+      .populate('images')
+      .sort({ featured: -1 });
+    res.json(products);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+
 // Get a product by ID
 exports.getProductById = async (req, res) => {
   try {
@@ -83,13 +106,21 @@ exports.searchProducts = async (req, res) => {
 
 exports.addNewProduct = async (req, res) => {
   try {
-    const product = new Product({
-      name: req.body.name,
-      description: req.body.description,
-      category: req.body.category,
-      images: req.processedImages || [],
-      createdBy: req.user._id,
-    });
+  const product = new Product({
+    name: req.body.name,
+    description: req.body.description,
+    category: req.body.category,
+    rank: req.body.rank ?? 0,
+    featured: req.body.featured ?? 0,
+    tags: req.body.tags || [],
+    dimensions: req.body.dimensions || [],
+    year: req.body.year || 0,
+    price: req.body.price ?? 0,
+    salePercent: req.body.salePercent ?? 0,
+    stock: req.body.stock ?? 1,
+    images: req.processedImages || [],
+    createdBy: req.user._id,
+  });
 
     const newProduct = await product.save();
     await newProduct.populate('images');
@@ -98,6 +129,7 @@ exports.addNewProduct = async (req, res) => {
     res.status(400).json({ message: err.message });
   }
 };
+
 
 exports.updateProductById = async (req, res) => {
   try {
@@ -110,6 +142,13 @@ exports.updateProductById = async (req, res) => {
       name: req.body.name || product.name,
       description: req.body.description || product.description,
       category: req.body.category || product.category,
+      rank: req.body.rank ?? product.rank,
+      featured: req.body.featured ?? product.featured,
+      tags: req.body.tags || product.tags,
+      dimensions: req.body.dimensions || product.dimensions,
+      year: req.body.year || product.year,
+      price: req.body.price ?? product.price,
+      salePercent: req.body.salePercent ?? product.salePercent,
       stock: req.body.stock ?? product.stock,
       startsAt: req.body.startsAt || product.startsAt,
       endsAt: req.body.endsAt || product.endsAt,
