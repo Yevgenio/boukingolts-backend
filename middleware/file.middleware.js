@@ -72,7 +72,7 @@ const processUploadedImages = async (req, res, next) => {
 };
 
 // 👇 Middleware to sync uploaded and existing images based on sortedImages
-const manageProductImages = async (req, res, next) => {
+const manageImages = async (req, res, next) => {
   try {
     // Insert new images if any were processed
     let newDocs = [];
@@ -143,5 +143,5 @@ const manageProductImages = async (req, res, next) => {
 module.exports = {
   upload,
   processUploadedImages,
-  manageProductImages,
+  manageImages,
 };

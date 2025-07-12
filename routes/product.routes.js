@@ -4,8 +4,8 @@ const mongoose = require('mongoose');
 
 const { verifyToken , verifyAdmin } = require('../middleware/auth.middleware');
 const productController = require('../controllers/product.controller');
-const { upload , processUploadedImages , manageProductImages  } = require('../middleware/file.middleware');
- 
+const { upload , processUploadedImages , manageImages  } = require('../middleware/file.middleware');
+const marqueeController = require('../controllers/marquee.controller');
 
 // GET all products
 router.get('/', productController.getAllProducts);
@@ -32,7 +32,7 @@ router.post(
     verifyAdmin, // Verify admin access
     upload, // Upload images
     processUploadedImages, // Process uploaded images
-    manageProductImages,
+    manageImages,
     productController.addNewProduct // Add new product
 );
 
@@ -43,7 +43,7 @@ router.put(
     verifyAdmin, // Verify admin access
     upload, // Upload images
     processUploadedImages, // Process uploaded images
-    manageProductImages,
+    manageImages,
     productController.updateProductById // Update product by ID
   );
 
@@ -54,5 +54,27 @@ router.delete(
     verifyAdmin,
     productController.deleteProductById
   ); 
+
+  // Marquee routes
+router.get('/marquee', marqueeController.getMarqueeProducts);
+router.get('/marquee/ids', marqueeController.getMarqueeProductIds);
+router.put(
+  '/marquee/ids',
+  verifyToken,
+  verifyAdmin,
+  marqueeController.updateMarqueeProductIds
+);
+router.post(
+  '/marquee/:id',
+  verifyToken,
+  verifyAdmin,
+  marqueeController.addProductToMarquee
+);
+router.delete(
+  '/marquee/:id',
+  verifyToken,
+  verifyAdmin,
+  marqueeController.removeProductFromMarquee
+);
   
 module.exports = router;
