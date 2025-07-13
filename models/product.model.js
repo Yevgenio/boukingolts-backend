@@ -16,4 +16,12 @@ const productSchema = new mongoose.Schema({
   createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: false },
 });
 
+// Add a text index to enable full-text search
+productSchema.index({
+  name: 'text',
+  description: 'text',
+  category: 'text',
+  tags: 'text',
+});
+
 module.exports = mongoose.model('Product', productSchema);

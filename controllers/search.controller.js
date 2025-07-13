@@ -13,6 +13,7 @@ exports.globalSearch = async (req, res) => {
       { name: { $regex: query, $options: 'i' } },
       { description: { $regex: query, $options: 'i' } },
       { category: { $regex: query, $options: 'i' } },
+      { tags: { $regex: query, $options: 'i' } },
     ];
   }
 

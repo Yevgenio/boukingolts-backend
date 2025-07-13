@@ -3,7 +3,8 @@ const router = express.Router();
 
 const { verifyToken, verifyAdmin } = require('../middleware/auth.middleware');
 const eventController = require('../controllers/event.controller');
-const { upload, processUploadedImages } = require('../middleware/file.middleware');
+const { upload, processUploadedImages, manageImages } = require('../middleware/file.middleware');
+
 
 // GET all products
 router.get('/', eventController.getAllEvents);         
@@ -13,12 +14,17 @@ router.get('/id/:id', eventController.getEventById);
 
 router.get('/search', eventController.searchEvents);    // GET product by query
 
+// GET distinct categories
+router.get('/categories', eventController.getDistinctCategories);
+
 // POST new product
 router.post(
     '/',
     verifyToken, 
     verifyAdmin, 
     upload,
+    processUploadedImages,
+    manageImages,
     eventController.addNewEvent
 );
 
@@ -27,7 +33,10 @@ router.put('/id/:id',
     verifyToken, 
     verifyAdmin, 
     upload,
-    eventController.updateEventById);  
+    processUploadedImages,
+    manageImages,
+    eventController.updateEventById
+);
 
 // DELETE product by ID
 router.delete('/id/:id',
@@ -35,10 +44,5 @@ router.delete('/id/:id',
     verifyAdmin, 
     eventController.deleteEventById
 ); 
-
-// Route definitions with category parameters
-// router.post('/new', eventController.catalog("new"));
-// router.post('/popular', eventController.catalog("popular"));
-// router.post('/sale', eventController.catalog("sale"));
 
 module.exports = router;

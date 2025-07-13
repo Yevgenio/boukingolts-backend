@@ -1,6 +1,16 @@
 const Product = require('../models/product.model');
 const Image = require('../models/image.model');
 
+// Helper to normalize tags input (string or array)
+const parseTags = (tags) => {
+  if (!tags) return [];
+  if (Array.isArray(tags)) return tags;
+  return tags
+    .split(',')
+    .map((t) => t.trim())
+    .filter((t) => t.length);
+};
+
 exports.getDistinctCategories = async (req, res) => {
   try {
     const categories = await Product.distinct("category");
@@ -65,6 +75,7 @@ exports.searchProducts = async (req, res) => {
         { name: { $regex: query, $options: 'i' } },
         { description: { $regex: query, $options: 'i' } },
         { category: { $regex: query, $options: 'i' } },
+        { tags: { $regex: query, $options: 'i' } },
       ];
     }
 
@@ -106,14 +117,13 @@ exports.searchProducts = async (req, res) => {
 
 exports.addNewProduct = async (req, res) => {
   try {
-
   const product = new Product({
     name: req.body.name,
     description: req.body.description,
     category: req.body.category,
     rank: req.body.rank ?? 0,
     featured: req.body.featured ?? 0,
-    tags: req.body.tags || [],
+    tags: parseTags(req.body.tags),
     dimensions: req.body.dimensions || [],
     year: req.body.year || 0,
     price: req.body.price ?? 0,
@@ -145,7 +155,10 @@ exports.updateProductById = async (req, res) => {
       category: req.body.category || product.category,
       rank: req.body.rank ?? product.rank,
       featured: req.body.featured ?? product.featured,
-      tags: req.body.tags || product.tags,
+      tags:
+        req.body.tags !== undefined
+          ? parseTags(req.body.tags)
+          : product.tags,
       dimensions: req.body.dimensions || product.dimensions,
       year: req.body.year || product.year,
       price: req.body.price ?? product.price,

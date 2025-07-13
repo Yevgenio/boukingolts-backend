@@ -1,8 +1,29 @@
-const Event = require('../models/event.model'); // Assuming you have a Event model defined
+const Event = require('../models/event.model');
+const Image = require('../models/image.model');
+
+// Helper to normalize tags input (string or array)
+const parseTags = (tags) => {
+  if (!tags) return [];
+  if (Array.isArray(tags)) return tags;
+  return tags
+    .split(',')
+    .map((t) => t.trim())
+    .filter((t) => t.length);
+};
+
+exports.getDistinctCategories = async (req, res) => {
+  try {
+    const categories = await Event.distinct("category");
+    res.json(categories);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
 
 exports.getAllEvents = async (req, res) => {
   try {
-    const events = await Event.find();
+    const events = await Event.find().populate('images');
     res.json(events);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -11,7 +32,7 @@ exports.getAllEvents = async (req, res) => {
 
 exports.getEventById = async (req, res) => {
   try {
-    const event = await Event.findById(req.params.id);
+    const event = await Event.findById(req.params.id).populate('images');
     if (!event) {
       return res.status(404).send('Event not found');
     }
@@ -23,15 +44,24 @@ exports.getEventById = async (req, res) => {
 
 exports.searchEvents =  async (req, res) => {
   try {
-    const { search, sort, limit, page } = req.query;
+    const { query, category, sort, limit, page } = req.query;
 
     // Build query object
-    const query = {};
-    if (search) {
-      query.$or = [
-        { name: { $regex: search, $options: 'i' } }, // Case-insensitive search
-        { description: { $regex: search, $options: 'i' } },
+    const searchQuery = {};
+    if (query) {
+      searchQuery.$or = [
+        { name: { $regex: query, $options: 'i' } }, // Case-insensitive search
+        { description: { $regex: query, $options: 'i' } },
+        { category: { $regex: query, $options: 'i' } },
+        { location: { $regex: query, $options: 'i' } },
+        { tags: { $regex: query, $options: 'i' } },
       ];
+    }
+
+    if (category === '') {
+      searchQuery.category = { $in: [null, ''] };
+    } else if (category) {
+      searchQuery.category = category;
     }
 
     // Define sort options
@@ -46,13 +76,14 @@ exports.searchEvents =  async (req, res) => {
     const skip = (currentPage - 1) * itemsPerPage;
 
     // Fetch events from the database
-    const events = await Event.find(query)
+    const events = await Event.find(searchQuery)
+      .populate('images')
       .sort(sortOptions)
       .skip(skip)
       .limit(itemsPerPage);
 
     // Total count for pagination
-    const totalCount = await Event.countDocuments(query);
+    const totalCount = await Event.countDocuments(searchQuery);
 
     res.json({
       data: events,
@@ -68,19 +99,20 @@ exports.searchEvents =  async (req, res) => {
 }
 
 exports.addNewEvent = async (req, res) => {
-  const imagePath = req.files?.imagePath ? req.files.imagePath[0].filename.split('/').pop() : 'default.jpg';
-
   const event = new Event({
     name: req.body.name,
     description: req.body.description,
-    link: req.body.link,
     category: req.body.category,
-    imagePath: imagePath,
+    tags: parseTags(req.body.tags),
+    images: req.processedImages || [],
+    location: req.body.location || '', // Default to empty string if not provided
+    date: req.body.date ? new Date(req.body.date) : new Date(), // Default to current date if not provided
     createdBy: req.user._id,
   });
 
   try {
     const newEvent = await event.save();
+    await newEvent.populate('images');
     res.status(201).json(newEvent);
   } catch (err) {
     res.status(400).json({ message: err.message });
@@ -95,20 +127,27 @@ exports.updateEventById = async (req, res) => {
       return res.status(404).json({ message: 'Event not found' });
     }
 
-    // Handle uploaded files
-    const imagePath = req.files?.imagePath ? req.files.imagePath[0].filename.split('/').pop() : existingEvent.imagePath.split('/').pop();
-
-    // Prepare the update data
     const updateData = {
-      ...existingEvent.toObject(), // Start with the existing data
-      ...req.body, // Overwrite with new data from the request
-      imagePath, // Use new or existing image path
+      name: req.body.name || existingEvent.name,
+      description: req.body.description || existingEvent.description,
+      category: req.body.category || existingEvent.category,
+      tags:
+        req.body.tags !== undefined
+          ? parseTags(req.body.tags)
+          : existingEvent.tags,
+      images: req.processedImages || existingEvent.images,
+      location: req.body.location || existingEvent.location,
+      date: req.body.date ? new Date(req.body.date) : existingEvent.date, // Default to existing date if not provided
     };
 
     // Ensure we don't accidentally update `_id` or other immutable fields
     delete updateData._id;
 
-    const updatedEvent = await Event.findByIdAndUpdate(req.params.id, updateData, { new: true, runValidators: true });
+    const updatedEvent = await Event.findByIdAndUpdate(
+      req.params.id,
+      updateData,
+      { new: true, runValidators: true }
+    ).populate('images');
 
     res.json(updatedEvent);
   } catch (err) {
@@ -121,8 +160,9 @@ exports.deleteEventById = async (req, res) => {
   try {
     const deletedEvent = await Event.findByIdAndDelete(req.params.id);
     if (!deletedEvent) return res.status(404).json({ message: 'Event not found' });
+    await Image.deleteMany({ _id: { $in: deletedEvent.images } });
     res.json({ message: 'Event deleted successfully' });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
-};
+}

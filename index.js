@@ -52,9 +52,9 @@ app.use('/api/auth', authRoutes);
 const userRoutes = require('./routes/user.routes');
 app.use('/api/user', userRoutes);
 
-// // Event Routes
-// const eventRoutes = require('./routes/event.routes');
-// app.use('/api/events', eventRoutes);
+// Event Routes
+const eventRoutes = require('./routes/event.routes');
+app.use('/api/events', eventRoutes);
 
 // Product Routes
 const productRoutes = require('./routes/product.routes');
