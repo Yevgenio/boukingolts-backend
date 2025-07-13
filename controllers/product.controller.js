@@ -106,6 +106,7 @@ exports.searchProducts = async (req, res) => {
 
 exports.addNewProduct = async (req, res) => {
   try {
+
   const product = new Product({
     name: req.body.name,
     description: req.body.description,
