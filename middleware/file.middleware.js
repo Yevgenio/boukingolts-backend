@@ -31,6 +31,7 @@ const processUploadedImages = async (req, res, next) => {
         const thumbnailFilename = `${base.slice(0, -ext.length)}-th${ext}`;
 
         const { data: thumbBuffer, info } = await sharp(file.buffer)
+          .rotate()
           .resize({ width: 400 })
           .toBuffer({ resolveWithObject: true });
 
