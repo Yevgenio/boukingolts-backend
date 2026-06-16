@@ -79,7 +79,7 @@ app.get('/api', async (req, res) => {
   });
 });
 
-// Kubernetes health probe — not logged
+// Kubernetes liveness probe — not logged
 app.get('/healthz', (req, res) => {
   res.sendStatus(200);
 });
