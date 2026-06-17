@@ -2,6 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const dotenv = require('dotenv');
+const { CORS_ORIGINS } = require('./config/env');
 const path = require('path');
 const cookieParser = require('cookie-parser');
 
@@ -11,7 +12,7 @@ dotenv.config();
 const app = express();
 
 app.use(cors({
-  origin: ['http://localhost:3000', 'https://source-code.click', 'https://boukingolts.art', 'https://www.boukingolts.art', 'https://elena.boukingolts.art', 'https://alexey.boukingolts.art', 'https://archive.boukingolts.art', 'https://staging.boukingolts.art'],
+  origin: CORS_ORIGINS,
   credentials: true,
 }));
 
@@ -78,7 +79,7 @@ app.get('/api', async (req, res) => {
   });
 });
 
-// Kubernetes health probe — not logged
+// Kubernetes liveness probe — not logged
 app.get('/healthz', (req, res) => {
   res.sendStatus(200);
 });
